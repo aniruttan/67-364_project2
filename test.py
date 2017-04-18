@@ -1,0 +1,60 @@
+
+import csv
+import numpy as np
+from sklearn.svm import SVR
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+
+def get_data(filename):
+	# filename.decode('iso-8859-1').encode('utf8')
+	# open(data_file, encoding = "ISO-8859-1")
+	dates = []
+	prices = []
+	with open(filename,'r',encoding = "utf-8") as csvfile:
+		csvFileReader = csv.reader(csvfile)
+		next(csvFileReader)
+		for row in csvFileReader:
+			dates.append(int(row[0].split('-')[0]))
+			prices.append(float(row[1]))
+	return dates,prices
+
+def predict_price(dates,prices,x):
+	dates = np.reshape(dates,(len(dates),1))
+	# prices = np.reshape(dates,len(prices),1)
+
+	svr_lin = SVR(kernel = 'linear',C=1e3)
+	svr_poly = SVR(kernel = 'poly',C=1e3,degree=2)
+	svr_rbf = SVR(kernel = 'rbf',C=1e3,gamma=0.1)
+
+	svr_lin.fit(dates,prices)
+	svr_poly.fit(dates,prices)
+	svr_rbf.fit(dates,prices)
+
+	plt.scatter(dates,prices,color='black',label='Data')
+	plt.plot(dates,svr_rbf.predict(dates),color='red',label='RBF model')
+	plt.plot(dates,svr_lin.predict(dates),color='green',label='linear model')
+	plt.plot(dates,svr_poly.predict(dates),color='blue',label='Polynomial model')
+	plt.xlabel('Date')
+	plt.ylabel('Price')
+	plt.title('Support Vector Regression')
+	plt.legend()
+	plt.show()
+	# plt.savefig("test.png")
+
+	return svr_rbf.predict(x)[0],svr_lin.predict(x)[0],svr_poly.predict(x)[0]
+
+dates,prices=get_data('aapl.csv')
+# dates = np.reshape(dates,(len(dates),1))
+# print(dates)
+# print(prices)
+# print(dates.shape)
+# print(prices.shape)
+
+predicted_price = predict_price(dates, prices,29)
+
+# print(predicted_price)
+
+
+
+	
